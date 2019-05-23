@@ -18,7 +18,7 @@
 
 - 你需要下载Python的开发环境（[Python官网](http://www.python.org)），**不要用PyCharm或者Anaconda，就用IDLE！** 不要把有限的精力分散给开发工具，好的开发工具会让你如虎添翼，可是你首先得变成“老虎”！
 
-- **务必下载3.x的版本**，这里的代码都是用Python3.x编写的，不支持Python2.x！
+- **务必下载Python 3.x的版本**，这里的代码都是用Python 3.x编写的，不支持Python 2.x！
 
 ## 其他
 
