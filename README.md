@@ -29,5 +29,5 @@
 ## 开始敲代码吧！
 
 ### 最基础的东西
-1. Hello world!
+1. [Hello world!](Code/Basic/Basic01.py)([思考题答案](Code/Basic/Basic01_a.py))
 2. 
