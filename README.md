@@ -35,3 +35,4 @@
 ### 最基础的东西
 1. [Hello world!](Code/Basic/Basic01.py)([思考题答案](Code/Basic/Basic01_a.py))
 2. [和Python打招呼](Code/Basic/Basic02.py)([思考题答案](Code/Basic/Basic02_a.py))
+3. [计算圆的面积和周长](Code/Basic/Basic03.py)([思考题答案](Code/Basic/Basic03_a.py))
