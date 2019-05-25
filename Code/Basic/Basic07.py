@@ -5,13 +5,10 @@
 最后修改于：2019/05/25
 '''
 
-import math
-
 a,b,c = input("请输入一元二次方程的系数a、b、c，用空格分开：").split()
 a,b,c = float(a),float(b),float(c)
 
 d = b**2 - (4 * a * c)      # 两个星号“**”表示幂运算，即“b**2”等价于“b*b”
-
 if d<0:
     print("方程没有实数根")
 elif d>0:
