@@ -33,10 +33,16 @@
 ## 开始敲代码吧！
 
 ### 最基础的东西
-1. [Hello world!](Code/Basic/Basic01.py)([思考题答案](Code/Basic/Basic01_a.py))
-2. [和Python打招呼](Code/Basic/Basic02.py)([思考题答案](Code/Basic/Basic02_a.py))
-3. [计算圆的面积和周长](Code/Basic/Basic03.py)([思考题答案](Code/Basic/Basic03_a.py))
-4. [大！更大！最大！](Code/Basic/Basic04.py)([思考题答案](Code/Basic/Basic04_a.py))
-7. [求一元二次方程的实数根](Code/Basic/Basic07.py)([思考题答案](Code/Basic/Basic07_a.py))
-5. [1+2+3+……+100=?](Code/Basic/Basic05.py)([思考题答案](Code/Basic/Basic05_a.py))
-6. [是闰年吗？](Code/Basic/Basic06.py)([思考题答案](Code/Basic/Basic06_a.py))
+1. [Hello world!](Code/Basic/Basic01.py)([思考题：一条print语句输出多行文本](Code/Basic/Basic01_a.py))
+2. [和Python打招呼](Code/Basic/Basic02.py)([思考题：指定print语句的分隔符](Code/Basic/Basic02_a.py))
+3. [计算圆的面积和周长](Code/Basic/Basic03.py)([思考题：多参数格式化字符串](Code/Basic/Basic03_a.py))
+4. [大！更大！最大！](Code/Basic/Basic04.py)([思考题：三个整数来排序](Code/Basic/Basic04_a.py))
+7. [求一元二次方程的实数根](Code/Basic/Basic07.py)([思考题：判断三角形的类型](Code/Basic/Basic07_a.py))
+5. [1+2+3+……+100=?](Code/Basic/Basic05.py)([思考题：求阶乘](Code/Basic/Basic05_a.py))
+6. [是闰年吗？](Code/Basic/Basic06.py)([思考题：今天是今年的第几天？](Code/Basic/Basic06_a.py))
+
+### 小海龟来画画
+1. [绘制五角星](Code/Turtle/Turtle01.py)（[思考题：指定位置的五角星](Code/Turtle/Turtle01_a.py)）
+2. 绘制同心圆（思考题：绘制彩虹）
+3. 两个五角星（思考题：好多五角星）
+4. 五星红旗迎风飘扬
