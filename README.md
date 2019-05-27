@@ -18,9 +18,13 @@
 
 - 你需要下载Python的开发环境（[Python官网](http://www.python.org)），**不要用PyCharm或者Anaconda，就用IDLE！** 不要把有限的精力分散给开发工具，好的开发工具会让你如虎添翼，可是你首先得变成“老虎”！
 
+    - [视频教程](https://v.youku.com/v_show/id_XMzQxNzY3MjU4OA==.html)
+
 - **务必下载Python 3.x的版本**，这里的代码都是用Python 3.x编写的，不支持Python 2.x！
 
 - 写代码的大概流程：打开IDLE->打开File菜单->选择New File菜单项->敲代码->打开Run菜单->选择Run module菜单项->根据提示保存程序文件->查看运行结果->反复运行和调试代码直到结果正确。
+
+    - [视频教程](https://v.youku.com/v_show/id_XMzY5NDA1ODAwNA==.html)
 
 ## 其他
 
