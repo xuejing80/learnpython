@@ -47,7 +47,7 @@
 8. [九九乘法表](Code/Basic/Basic08.py)([思考题：百鸡百钱](Code/Basic/Basic08_a.py))
 
 ### 小海龟来画画
-1. [绘制五角星](Code/Turtle/Turtle01.py)（[思考题：指定位置的五角星](Code/Turtle/Turtle01_a.py)）
-2. 绘制同心圆（思考题：绘制彩虹）
-3. 两个五角星（思考题：好多五角星）
+1. [绘制五角星](Code/Turtle/Turtle01.py)([思考题：指定位置的五角星](Code/Turtle/Turtle01_a.py))
+2. [绘制同心圆](Code/Turtle/Turtle02.py)([思考题：绘制彩虹](Code/Turtle/Turtle02_a.py))
+3. 两个五角星(思考题：好多五角星)
 4. 五星红旗迎风飘扬
