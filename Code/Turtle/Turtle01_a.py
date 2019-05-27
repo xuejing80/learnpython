@@ -31,3 +31,5 @@ for i in range(5):
     t.forward(100)
     t.left(144)
 t.end_fill()
+
+t.hideturtle()          # 为了不影响最后的效果，还可以把小海龟隐藏起来
