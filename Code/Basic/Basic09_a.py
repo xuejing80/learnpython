@@ -21,7 +21,7 @@ for i in range(2,101):
         S += i
 print("方案一：100以内所有素数的和为%d" % S)
 
-# 方案二，构造100以内的素数的序列，然后直接使用sum函数进行求和
+# 方案二，构造100以内的素数的列表，然后直接使用sum函数进行求和
 nums = [i for i in range(2,101) if isPrime(i)]
 print("方案二：100以内所有素数的和为%d" % sum(nums))
 
