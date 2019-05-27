@@ -45,6 +45,7 @@
 5. [1+2+3+……+100=?](Code/Basic/Basic05.py)([思考题：求阶乘](Code/Basic/Basic05_a.py))
 6. [是闰年吗？](Code/Basic/Basic06.py)([思考题：今天是今年的第几天？](Code/Basic/Basic06_a.py))
 8. [九九乘法表](Code/Basic/Basic08.py)([思考题：百鸡百钱](Code/Basic/Basic08_a.py))
+9. [是素数吗？](Code/Basic/Basic09.py)([思考题：100以内的素数和](Code/Basic/Basic09_a.py))
 
 ### 小海龟来画画
 1. [绘制五角星](Code/Turtle/Turtle01.py)([思考题：指定位置的五角星](Code/Turtle/Turtle01_a.py))
