@@ -21,12 +21,12 @@ t.shape("turtle")
     (5,0,-1)    # 还是绘制5个圆，起始圆变小了
 '''
 for i in range(10, 0, -1):
-    t.goto(20*i, 0)     # 向右移动海龟到圆上
+    t.goto(20*i, 0)     # 移动海龟到圆上，goto函数的参数是平面坐标系的坐标(x,y)
     t.setheading(90)    # 调整方向，准备画圆
     t.color(random(), random(), random())
     # 上面的语句用来设置圆的颜色，三个0~1之间的数分别表示红色、绿色、蓝色的比重
     t.begin_fill()
-    t.circle(20*i)      # circle函数的参数为半径，其正负决定了圆在左边还是右边
+    t.circle(20*i)      # circle函数的参数为半径，其正负决定了往左还是往右画圆
     t.end_fill()
 
 '''
