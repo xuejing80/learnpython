@@ -26,7 +26,7 @@ def drawStar(x, y, r, color, heading):
     t.end_fill()
 
 t.speed(10)         # 因为星星太多了，所以加个速吧，1-10表示速度，0表示不显示动画
-for i in range(10):
+for i in range(20):
     x, y = random.randint(-200, 200), random.randint(-200, 200) # 随机产生坐标
     r = random.randint(10, 50)                                  # 随机产生大小
     color = (random.random(), random.random(), random.random()) # 随机产生颜色
