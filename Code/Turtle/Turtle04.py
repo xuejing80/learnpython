@@ -14,7 +14,7 @@ def drawStar(x, y, r, color, heading):
     t.down()
     t.color(color)
     t.setheading(heading)
-    edge=r*math.sin(math.radians(136))/math.sin(math.radians(126))
+    edge=r*math.sin(math.radians(36))/math.sin(math.radians(126))
     t.forward(r)
     t.left(180-18)
     t.begin_fill()

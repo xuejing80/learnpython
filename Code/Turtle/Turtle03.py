@@ -14,7 +14,7 @@ def drawStar(x, y):
     t.goto(x, y)
     t.down()
     t.setheading(90)
-    edge=100*math.sin(math.radians(136))/math.sin(math.radians(126))
+    edge=100*math.sin(math.radians(36))/math.sin(math.radians(126))
     t.forward(100)
     t.left(180-18)
     t.begin_fill()
