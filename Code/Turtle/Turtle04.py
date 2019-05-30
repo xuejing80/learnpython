@@ -1,10 +1,10 @@
 '''
-功能：绘制两个五角星
+功能：绘制五星红旗
 重点：三角函数的使用、角度和弧度的换算
 作者：薛景
 最后修改于：2019/05/30
 '''
-import turtle, math, random
+import turtle, math
 t = turtle.Turtle()
 t.shape("turtle")
 
