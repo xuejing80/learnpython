@@ -54,4 +54,4 @@
 4. [五星红旗迎风飘扬](Code/Turtle/Turtle04.py)
 
 ### 力扣初级算法
-1. [数组：从排序数组中删除重复项](Code\Leetcode\top-interview-questions-easy\Array21.py)
+1. [数组：从排序数组中删除重复项](Code/Leetcode/top-interview-questions-easy/Array21.py)
