@@ -30,6 +30,6 @@ class Solution:
 
 # 以下是本地测试代码，提交时只需复制上面的代码块即可
 solution = Solution()
-nums = [0,0,1,1,1,2,2,3,3,4]
+nums = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
 solution.removeDuplicates(nums)
 print(nums)
