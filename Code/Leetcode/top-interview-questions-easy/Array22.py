@@ -18,11 +18,11 @@ class Solution:
             if prices[i]>prices[i-1]:
                 if not isBought:
                     boughtPrice = prices[i-1]
-                    isBought = True
+                    isBought = True     # 表示已买入股票
             elif prices[i]<prices[i-1]:
                 if isBought:
                     profit += prices[i-1] - boughtPrice
-                    isBought = False
+                    isBought = False    # 表示已卖出股票
         if isBought:
             profit += prices[-1] - boughtPrice
         return profit
