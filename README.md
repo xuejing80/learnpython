@@ -56,3 +56,4 @@
 ### 力扣初级算法
 1. [数组：从排序数组中删除重复项](Code/Leetcode/top-interview-questions-easy/Array21.py)
 2. [数组：买卖股票的最佳时机 II](Code/Leetcode/top-interview-questions-easy/Array22.py)
+3. [数组：旋转数组](Code/Leetcode/top-interview-questions-easy/Array23.py)
