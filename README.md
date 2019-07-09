@@ -60,3 +60,4 @@
 4. [数组：存在重复](Code/Leetcode/top-interview-questions-easy/Array24.py)
 5. [数组：只出现一次的数字](Code/Leetcode/top-interview-questions-easy/Array25.py)
 6. [数组：两个数组的交集 II](Code/Leetcode/top-interview-questions-easy/Array26.py)
+7. [数组：加一](Code/Leetcode/top-interview-questions-easy/Array27.py)
