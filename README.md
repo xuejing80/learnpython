@@ -61,3 +61,4 @@
 5. [数组：只出现一次的数字](Code/Leetcode/top-interview-questions-easy/Array25.py)
 6. [数组：两个数组的交集 II](Code/Leetcode/top-interview-questions-easy/Array26.py)
 7. [数组：加一](Code/Leetcode/top-interview-questions-easy/Array27.py)
+8. [数组：移动零](Code/Leetcode/top-interview-questions-easy/Array28.py)
