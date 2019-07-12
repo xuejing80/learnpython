@@ -3,7 +3,7 @@
 来源：https://leetcode-cn.com/explore/interview/card/top-interview-questions-easy/1/array/26/
 重点：学会找到影响程序执行效率的语句
 作者：薛景
-最后修改于：2019/07/09
+最后修改于：2019/07/12
 '''
 
 # 方案一，传统方案，先通过比较两个列表中的元素数，把元素少的放在nums1里面，这样
@@ -24,13 +24,13 @@ class Solution:
 # 这里我们做个实验，看一下remove操作和append操作哪一个是费时的原因
 import time
 result = []
-time1 = time.clock()
+time1 = time.process_time()
 for i in range(100000):
     result.append(i)
-time2 = time.clock()
+time2 = time.process_time()
 for i in range(100000):
     result.remove(i)
-time3 = time.clock()
+time3 = time.process_time()
 print("100000次append共消耗{:.0f}毫秒".format((time2-time1)*1000))
 print("100000次remove共消耗{:.0f}毫秒".format((time3-time2)*1000))
 
