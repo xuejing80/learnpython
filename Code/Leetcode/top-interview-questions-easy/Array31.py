@@ -32,11 +32,11 @@ class Solution:
         row, col = len(matrix), len(matrix[0])
         for i in range((row+1)//2):
             for j in range(col//2):
-                tmp = matrix[i][j]
+                temp = matrix[i][j]
                 matrix[i][j] = matrix[row-1-j][i]
                 matrix[row-1-j][i] = matrix[row-1-i][col-1-j]
                 matrix[row-1-i][col-1-j] = matrix[j][col-1-i] 
-                matrix[j][col-1-i]  = tmp
+                matrix[j][col-1-i]  = temp
 
 # 以下是本地测试代码，提交时只需复制上面的代码块即可
 solution = Solution()
