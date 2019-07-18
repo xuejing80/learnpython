@@ -54,14 +54,17 @@
 4. [五星红旗迎风飘扬](Code/Turtle/Turtle04.py)
 
 ### 力扣初级算法
-1. [数组：从排序数组中删除重复项](Code/Leetcode/top-interview-questions-easy/Array21.py)
-2. [数组：买卖股票的最佳时机 II](Code/Leetcode/top-interview-questions-easy/Array22.py)
-3. [数组：旋转数组](Code/Leetcode/top-interview-questions-easy/Array23.py)
-4. [数组：存在重复](Code/Leetcode/top-interview-questions-easy/Array24.py)
-5. [数组：只出现一次的数字](Code/Leetcode/top-interview-questions-easy/Array25.py)
-6. [数组：两个数组的交集 II](Code/Leetcode/top-interview-questions-easy/Array26.py)
-7. [数组：加一](Code/Leetcode/top-interview-questions-easy/Array27.py)
-8. [数组：移动零](Code/Leetcode/top-interview-questions-easy/Array28.py)
-9. [数组：两数之和](Code/Leetcode/top-interview-questions-easy/Array29.py)
-10. [数组：有效的数独](Code/Leetcode/top-interview-questions-easy/Array30.py)
-11. [数组：旋转图像](Code/Leetcode/top-interview-questions-easy/Array31.py)
+* 数组
+1. [从排序数组中删除重复项](Code/Leetcode/top-interview-questions-easy/Array21.py)
+2. [买卖股票的最佳时机 II](Code/Leetcode/top-interview-questions-easy/Array22.py)
+3. [旋转数组](Code/Leetcode/top-interview-questions-easy/Array23.py)
+4. [存在重复](Code/Leetcode/top-interview-questions-easy/Array24.py)
+5. [只出现一次的数字](Code/Leetcode/top-interview-questions-easy/Array25.py)
+6. [两个数组的交集 II](Code/Leetcode/top-interview-questions-easy/Array26.py)
+7. [加一](Code/Leetcode/top-interview-questions-easy/Array27.py)
+8. [移动零](Code/Leetcode/top-interview-questions-easy/Array28.py)
+9. [两数之和](Code/Leetcode/top-interview-questions-easy/Array29.py)
+10. [有效的数独](Code/Leetcode/top-interview-questions-easy/Array30.py)
+11. [旋转图像](Code/Leetcode/top-interview-questions-easy/Array31.py)
+* 字符串
+1. [反转字符串](Code/Leetcode/top-interview-questions-easy/String32.py)
