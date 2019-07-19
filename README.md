@@ -68,3 +68,4 @@
 11. [旋转图像](Code/Leetcode/top-interview-questions-easy/Array31.py)
 * 字符串
 1. [反转字符串](Code/Leetcode/top-interview-questions-easy/String32.py)
+2. [整数反转](Code/Leetcode/top-interview-questions-easy/String33.py)
