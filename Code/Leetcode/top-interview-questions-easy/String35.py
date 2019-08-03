@@ -14,7 +14,6 @@ class Solution:
         from collections import Counter
         return Counter(s)==Counter(t)
         
-        
 # 以下是本地测试代码，提交时只需复制上面的代码块即可
 solution = Solution()
 s = "anagram"
