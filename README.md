@@ -72,3 +72,4 @@
 3. [字符串中的第一个唯一字符](Code/Leetcode/top-interview-questions-easy/String34.py)
 4. [有效的字母异位词](Code/Leetcode/top-interview-questions-easy/String35.py)
 5. [验证回文字符串](Code/Leetcode/top-interview-questions-easy/String36.py)
+6. [字符串转换整数 (atoi)](Code/Leetcode/top-interview-questions-easy/String37.py)
