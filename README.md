@@ -73,6 +73,7 @@
 4. [有效的字母异位词](Code/Leetcode/top-interview-questions-easy/String35.py)
 5. [验证回文字符串](Code/Leetcode/top-interview-questions-easy/String36.py)
 6. [字符串转换整数 (atoi)](Code/Leetcode/top-interview-questions-easy/String37.py)
+7. [实现 strStr()](Code/Leetcode/top-interview-questions-easy/String38.py)
 
 ### 人工智能导论（伯克利大学的CS188课程）项目实战
 * [项目介绍](http://inst.cs.berkeley.edu/~cs188/fa19/)
