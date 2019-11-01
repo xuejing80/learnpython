@@ -76,5 +76,5 @@
 7. [实现 strStr()](Code/Leetcode/top-interview-questions-easy/String38.py)
 
 ### 人工智能导论（伯克利大学的CS188课程）项目实战
-* [项目介绍](http://inst.cs.berkeley.edu/~cs188/fa19/)
+* [项目介绍](http://inst.cs.berkeley.edu/~cs188/fa19/projects/)
 1. [Project 1: Search](Code/CS188/search/search.py)
