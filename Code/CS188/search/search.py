@@ -137,6 +137,47 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+
+    # 因为后继节点中的方向是字符串，用这个字典可以把字符串转换成表示方向的常量
+    from game import Directions
+    D = {
+    "South" : Directions.SOUTH,
+    "West" : Directions.WEST,
+    "North" : Directions.NORTH,
+    "East" : Directions.EAST,
+    }
+    
+    # 初始化相关参数，算法描述中的Path-Cost感觉没啥用呀-_-!
+    node, pathCost = problem.getStartState(), 0
+    # 特别注意，与深度优先不同，广度优先需要为每一个节点记录行动方案，所以空间成本好大呀！
+    solution = {node:[]}
+    # 测试当前送进来的节点是否满足目标要求，如果已经是一个可行解，就返回行动方案
+    if problem.isGoalState(node):
+        return solution[node]
+    # 如果上面的测试不成立，则建立一个队列frontier，并将节点塞进队列中
+    frontier = util.Queue()
+    frontier.push(node)
+    explored = set()
+    # while True表示反复执行循环体，但是，循环体中的return语句可以打破循环并返回结果
+    while True:
+        # 如果frontier队列中已经没有节点了，表示此题无解
+        if frontier.isEmpty():
+            return None
+        # 从frontier队列中弹出一个节点node，并将该节点加入explored集合中
+        node = frontier.pop()
+        explored.add(node)
+        # 遍历节点node的子节点child，尝试找到可行解
+        for child,direction,step in problem.getSuccessors(node):
+            # 如果该child已经访问过了，就跳过吧
+            if child not in explored:
+                # 先把父节点node的行动方案复制一份，再把当前子节点的动作加到方案里面
+                solution[child] = solution[node].copy()
+                solution[child].append(D[direction])
+                # 如果该子节点满足目标要求，就返回这个子节点对应的行动方案
+                if problem.isGoalState(child):
+                    return solution[child]
+                # 如果该子节点不满足目标要求，就把它塞到frontier里面，过会儿继续展开
+                frontier.push(child)
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
