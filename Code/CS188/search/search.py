@@ -103,7 +103,7 @@ def depthFirstSearch(problem):
             return solution
         # 否则，就构造循环遍历这个节点的所有子节点
         else:
-            for child,direction,step in problem.getSuccessors(node):
+            for child,direction,cost in problem.getSuccessors(node):
                 # 如果子节点是还没有计算过的节点，就开始继续往下走
                 if child not in closedSet:
                     # 在行动方案中增加当前子节点的执行动作
@@ -132,7 +132,6 @@ def depthFirstSearch(problem):
     # 调用递归函数进行问题求解，多一个参数就是上面的集合
     solution = Recursive_DFS(problem.getStartState(),problem,solution,closedSet)
     return solution
-    util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -167,7 +166,7 @@ def breadthFirstSearch(problem):
         node = frontier.pop()
         explored.add(node)
         # 遍历节点node的子节点child，尝试找到可行解
-        for child,direction,step in problem.getSuccessors(node):
+        for child,direction,cost in problem.getSuccessors(node):
             # 如果该child已经访问过了，就跳过吧
             if child not in explored:
                 # 先把父节点node的行动方案复制一份，再把当前子节点的动作加到方案里面
@@ -178,12 +177,55 @@ def breadthFirstSearch(problem):
                     return solution[child]
                 # 如果该子节点不满足目标要求，就把它塞到frontier里面，过会儿继续展开
                 frontier.push(child)
-    util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    # 后继节点中的方向是以字符串形式表示的，用这个字典可以把字符串转换成表示方向的常量
+    from game import Directions
+    D = {
+    "South" : Directions.SOUTH,
+    "West" : Directions.WEST,
+    "North" : Directions.NORTH,
+    "East" : Directions.EAST,
+    }
+    
+    # 初始化相关参数
+    node = problem.getStartState()
+    frontier = util.PriorityQueue()
+    frontier.push(node, 0)
+    explored = set()
+    solution = {node:[]}
+    # 为了记录每个节点的行动代价，只能再定义一个字典来存放
+    pathcost = {node:0}
+    # while True表示反复执行循环体，但是，循环体中的return语句可以打破循环并返回结果
+    while True:
+        # 如果frontier队列中已经没有节点了，表示此题无解
+        if frontier.isEmpty():
+            return None
+        # 从frontier队列中弹出一个节点node
+        node = frontier.pop()
+        # 测试当前节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node):
+            return solution[node]
+        # 将该节点加入explored集合中
+        explored.add(node)
+        # 遍历节点node的子节点child，尝试找到可行解
+        for child,direction,cost in problem.getSuccessors(node):
+            # 根据该子节点是否访问过，更新frontier队列
+            if child not in explored:
+                frontier.push(child,cost)
+                # 把当前子节点的动作加到行动方案里面，并记录其行动代价
+                solution[child] = solution[node].copy()
+                solution[child].append(D[direction])
+                pathcost[child] = pathcost[node] + cost
+            elif pathcost[child] > pathcost[node] + cost:
+                # 如果已经记录的行动代价比当前路径的行动代价要高，则替换原来的方案
+                frontier.update(child,cost)
+                solution[child] = solution[node].copy()
+                solution[child].append(D[direction])
+                pathcost[child] = pathcost[node] + cost
 
 def nullHeuristic(state, problem=None):
     """
