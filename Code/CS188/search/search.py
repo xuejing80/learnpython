@@ -237,8 +237,53 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    # 后继节点中的方向是以字符串形式表示的，用这个字典可以把字符串转换成表示方向的常量
+    from game import Directions
+    D = {
+    "South" : Directions.SOUTH,
+    "West" : Directions.WEST,
+    "North" : Directions.NORTH,
+    "East" : Directions.EAST,
+    }
+    
+    # 初始化相关参数
+    node = problem.getStartState()
+    frontier = util.PriorityQueue()
+    frontier.push(node, 0)
+    explored = set()
+    solution = {node:[]}
+    # 为了记录每个节点的行动代价，只能再定义一个字典来存放
+    pathcost = {node:0}
+    # while True表示反复执行循环体，但是，循环体中的return语句可以打破循环并返回结果
+    while True:
+        # 如果frontier队列中已经没有节点了，表示此题无解
+        if frontier.isEmpty():
+            return None
+        # 从frontier队列中弹出一个节点node
+        node = frontier.pop()
+        # 测试当前节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node):
+            return solution[node]
+        # 将该节点加入explored集合中
+        explored.add(node)
+        # 遍历节点node的子节点child，尝试找到可行解
+        for child,direction,cost in problem.getSuccessors(node):
+            # 根据该子节点是否访问过，更新frontier队列
+            if child not in explored:
+                # 和之前的一致代价搜索不一样的是，此处需要把启发值算进去
+                frontier.push(child,cost + heuristic(node, problem))
+                # 把当前子节点的动作加到行动方案里面，并记录其行动代价
+                solution[child] = solution[node].copy()
+                solution[child].append(D[direction])
+                pathcost[child] = pathcost[node] + cost
+            elif pathcost[child] > pathcost[node] + cost:
+                # 如果已经记录的行动代价比当前路径的行动代价要高，则替换原来的方案
+                # 同样的道理，在更新froniter队列的时候，也要将启发值算进去
+                frontier.update(child,cost + heuristic(node, problem))
+                solution[child] = solution[node].copy()
+                solution[child].append(D[direction])
+                pathcost[child] = pathcost[node] + cost
 
 # Abbreviations
 bfs = breadthFirstSearch

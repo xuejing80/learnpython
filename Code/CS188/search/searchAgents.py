@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        # 这里我没有用上，^_^
 
     def getStartState(self):
         """
@@ -295,14 +296,17 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 依然以吃豆人的初始位置作为起始状态
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 我的想法是：在吃豆人经过包含豆豆的坐标时，把该坐标加入状态中，所以，如果某个状态中
+        # 包含了全部豆豆的坐标，那么就可以认定其达到了任务目标
+        return set(self.corners).issubset(set(state))
 
     def getSuccessors(self, state):
         """
@@ -325,6 +329,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            # 某个状态中最开始的两个数字就是当前吃豆人的坐标
+            x,y = state[:2]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            # 下方的判定表示下一个坐标不能是游戏中的墙壁
+            if not self.walls[nextx][nexty]:
+                # 下方的判定表示如果下一个坐标包含豆豆且吃豆人是第一次经过，那么就在状态中记录下这个坐标
+                if ((nextx,nexty) in self.corners) and ((nextx,nexty) not in state):
+                    # 务必注意：记录新坐标的时候，一定要把之前的信息保留完整！
+                    successors.append( ((nextx, nexty)+state[2:]+((nextx,nexty),), action, 1) )
+                else:
+                    successors.append( ((nextx, nexty)+state[2:], action, 1) )
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
