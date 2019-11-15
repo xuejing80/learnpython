@@ -87,16 +87,6 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    
-    # 因为后继节点中的方向是字符串，用这个字典可以把字符串转换成表示方向的常量
-    from game import Directions
-    D = {
-    "South" : Directions.SOUTH,
-    "West" : Directions.WEST,
-    "North" : Directions.NORTH,
-    "East" : Directions.EAST,
-    }
-    
     def Recursive_DFS(node,problem,solution,closedSet):
         # 测试当前送进来的节点是否满足目标要求，如果是一个可行解，就返回行动方案
         if problem.isGoalState(node):
@@ -107,7 +97,7 @@ def depthFirstSearch(problem):
                 # 如果子节点是还没有计算过的节点，就开始继续往下走
                 if child not in closedSet:
                     # 在行动方案中增加当前子节点的执行动作
-                    solution.append(D[direction])
+                    solution.append(direction)
                     # 然后把这个子节点增加到计算过的节点集合中
                     closedSet.add(child)
                     # 调用递归函数继续从当前子节点往下计算
@@ -136,16 +126,6 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-
-    # 因为后继节点中的方向是字符串，用这个字典可以把字符串转换成表示方向的常量
-    from game import Directions
-    D = {
-    "South" : Directions.SOUTH,
-    "West" : Directions.WEST,
-    "North" : Directions.NORTH,
-    "East" : Directions.EAST,
-    }
-    
     # 初始化相关参数，算法描述中的Path-Cost感觉没啥用呀-_-!
     node, pathCost = problem.getStartState(), 0
     # 特别注意，与深度优先不同，广度优先需要为每一个节点记录行动方案，所以空间成本好大呀！
@@ -165,67 +145,48 @@ def breadthFirstSearch(problem):
         # 从frontier队列中弹出一个节点node，并将该节点加入explored集合中
         node = frontier.pop()
         explored.add(node)
-        # 遍历节点node的子节点child，尝试找到可行解
+        # 判断该节点是否满足目标要求，如果是，就返回这个节点对应的行动方案
+        if problem.isGoalState(node):
+            return solution[node]
         for child,direction,cost in problem.getSuccessors(node):
             # 如果该child已经访问过了，就跳过吧
-            if child not in explored:
+            if (child not in explored) and (child not in frontier.list):
                 # 先把父节点node的行动方案复制一份，再把当前子节点的动作加到方案里面
                 solution[child] = solution[node].copy()
-                solution[child].append(D[direction])
-                # 如果该子节点满足目标要求，就返回这个子节点对应的行动方案
-                if problem.isGoalState(child):
-                    return solution[child]
-                # 如果该子节点不满足目标要求，就把它塞到frontier里面，过会儿继续展开
+                solution[child].append(direction)
+                # 将子节点加入frontier队列
                 frontier.push(child)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    
-    # 后继节点中的方向是以字符串形式表示的，用这个字典可以把字符串转换成表示方向的常量
-    from game import Directions
-    D = {
-    "South" : Directions.SOUTH,
-    "West" : Directions.WEST,
-    "North" : Directions.NORTH,
-    "East" : Directions.EAST,
-    }
-    
     # 初始化相关参数
-    node = problem.getStartState()
-    frontier = util.PriorityQueue()
-    frontier.push(node, 0)
+    result = []
     explored = set()
-    solution = {node:[]}
-    # 为了记录每个节点的行动代价，只能再定义一个字典来存放
-    pathcost = {node:0}
-    # while True表示反复执行循环体，但是，循环体中的return语句可以打破循环并返回结果
-    while True:
-        # 如果frontier队列中已经没有节点了，表示此题无解
-        if frontier.isEmpty():
-            return None
-        # 从frontier队列中弹出一个节点node
-        node = frontier.pop()
-        # 测试当前节点是否满足目标要求，如果是一个可行解，就返回行动方案
+    frontier = util.PriorityQueue()
+    # 定义起始状态，其中包括开始的位置，对应的行动方案和行动代价
+    start = (problem.getStartState(), [], 0)
+    # 把起始状态放进frontier队列中，update方法会自动对其中的状态按照其行动代价进行排序
+    frontier.update(start,0)
+    # 构造循环，循环读取frontier中的状态，进行判定
+    while not frontier.isEmpty():
+        # 获取当前节点的各项信息
+        (node, path, cost) = frontier.pop()
+        # 如果弹出的节点状态满足目标要求，停止循环
         if problem.isGoalState(node):
-            return solution[node]
-        # 将该节点加入explored集合中
-        explored.add(node)
-        # 遍历节点node的子节点child，尝试找到可行解
-        for child,direction,cost in problem.getSuccessors(node):
-            # 根据该子节点是否访问过，更新frontier队列
-            if child not in explored:
-                frontier.push(child,cost)
-                # 把当前子节点的动作加到行动方案里面，并记录其行动代价
-                solution[child] = solution[node].copy()
-                solution[child].append(D[direction])
-                pathcost[child] = pathcost[node] + cost
-            elif pathcost[child] > pathcost[node] + cost:
-                # 如果已经记录的行动代价比当前路径的行动代价要高，则替换原来的方案
-                frontier.update(child,cost)
-                solution[child] = solution[node].copy()
-                solution[child].append(D[direction])
-                pathcost[child] = pathcost[node] + cost
+            result = path
+            break
+        # 如果该节点该节点不满足目标要求，判定其是否访问过
+        if node not in explored:
+            explored.add(node)
+            # 遍历这个节点的子节点，更新frontier队列
+            for child,direction,step in problem.getSuccessors(node):
+                newPath = path + [direction]
+                newCost = cost + step
+                newNode = (child, newPath, newCost)
+                frontier.update(newNode, newCost)
+    # 返回计算结果，即一个行动方案
+    return result
 
 def nullHeuristic(state, problem=None):
     """
@@ -237,21 +198,12 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-
-    # 后继节点中的方向是以字符串形式表示的，用这个字典可以把字符串转换成表示方向的常量
-    from game import Directions
-    D = {
-    "South" : Directions.SOUTH,
-    "West" : Directions.WEST,
-    "North" : Directions.NORTH,
-    "East" : Directions.EAST,
-    }
-    
     # 初始化相关参数
     node = problem.getStartState()
     frontier = util.PriorityQueue()
     frontier.push(node, 0)
     explored = set()
+    frontierSet = set( (node,) )
     solution = {node:[]}
     # 为了记录每个节点的行动代价，只能再定义一个字典来存放
     pathcost = {node:0}
@@ -262,28 +214,35 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             return None
         # 从frontier队列中弹出一个节点node
         node = frontier.pop()
+        frontierSet.remove(node)
         # 测试当前节点是否满足目标要求，如果是一个可行解，就返回行动方案
         if problem.isGoalState(node):
             return solution[node]
         # 将该节点加入explored集合中
         explored.add(node)
+        # input()
+        # print("explored:",node)
         # 遍历节点node的子节点child，尝试找到可行解
         for child,direction,cost in problem.getSuccessors(node):
             # 根据该子节点是否访问过，更新frontier队列
-            if child not in explored:
+            if (child not in explored) and (child not in frontierSet):
+                # print("push:",child,"cost:",cost + heuristic(child, problem))
                 # 和之前的一致代价搜索不一样的是，此处需要把启发值算进去
                 frontier.push(child,cost + heuristic(node, problem))
                 # 把当前子节点的动作加到行动方案里面，并记录其行动代价
                 solution[child] = solution[node].copy()
-                solution[child].append(D[direction])
+                solution[child].append(direction)
                 pathcost[child] = pathcost[node] + cost
+                frontierSet.add(child)
             elif pathcost[child] > pathcost[node] + cost:
+                # print("update:",child,"cost:",cost + heuristic(child, problem))
                 # 如果已经记录的行动代价比当前路径的行动代价要高，则替换原来的方案
                 # 同样的道理，在更新froniter队列的时候，也要将启发值算进去
                 frontier.update(child,cost + heuristic(node, problem))
                 solution[child] = solution[node].copy()
-                solution[child].append(D[direction])
+                solution[child].append(direction)
                 pathcost[child] = pathcost[node] + cost
+                frontierSet.add(child)
 
 # Abbreviations
 bfs = breadthFirstSearch
