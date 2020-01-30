@@ -72,16 +72,13 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def depthFirstSearch(problem):
+def depthFirstSearch_Old(problem):
     """
     Search the deepest nodes in the search tree first.
-
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
-
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
@@ -123,9 +120,52 @@ def depthFirstSearch(problem):
     solution = Recursive_DFS(problem.getStartState(),problem,solution,closedSet)
     return solution
 
-def breadthFirstSearch(problem):
+def depthFirstSearch(problem):
+    """
+    Search the deepest nodes in the search tree first.
+
+    Your search algorithm needs to return a list of actions that reaches the
+    goal. Make sure to implement a graph search algorithm.
+
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    """
+    "*** YOUR CODE HERE ***"
+    # 初始化搜索状态
+    fringe = util.Stack()
+    node = {"state":problem.getStartState(), "path":[], "cost":0}
+    fringe.push(node)
+    explored = set()
+    # 构造循环展开搜索树
+    while (not fringe.isEmpty()):
+        # 获得待判定的叶子节点
+        node = fringe.pop()
+        # 判断节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node["state"]):
+            return node["path"]
+        # 否则，就继续从这个叶子节点往下展开
+        else:
+            # 先判断一下这个节点是不是已经展开过了，避免重复展开
+            if node["state"] not in explored:
+                for nextnode in problem.getSuccessors(node["state"]):
+                    # 为了适应可能的数据结构为图，必须判定叶子节点是否已经访问过
+                    if nextnode[0] not in explored:
+                        nextnode = {"state":nextnode[0],
+                                    "path":node["path"]+[nextnode[1]],
+                                    "cost":node["cost"]+nextnode[2]}
+                        # 如果没有访问过，就将叶子节点添加到待搜索的节点集合中
+                        fringe.push(nextnode)
+                # 最后不要忘记把搜索过的节点添加到访问过的节点集合中
+                explored.add(node["state"])
+
+def breadthFirstSearch_Old(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    
     # 初始化相关参数，算法描述中的Path-Cost感觉没啥用呀-_-!
     node, pathCost = problem.getStartState(), 0
     # 特别注意，与深度优先不同，广度优先需要为每一个节点记录行动方案，所以空间成本好大呀！
@@ -157,7 +197,37 @@ def breadthFirstSearch(problem):
                 # 将子节点加入frontier队列
                 frontier.push(child)
 
-def uniformCostSearch(problem):
+def breadthFirstSearch(problem):
+    """Search the shallowest nodes in the search tree first."""
+    "*** YOUR CODE HERE ***"
+    # 初始化搜索状态
+    fringe = util.Queue()
+    node = {"state":problem.getStartState(), "path":[], "cost":0}
+    fringe.push(node)
+    explored = set()
+    # 构造循环展开搜索树
+    while (not fringe.isEmpty()):
+        # 获得待判定的叶子节点
+        node = fringe.pop()
+        # 判断节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node["state"]):
+            return node["path"]
+        # 否则，就继续从这个叶子节点往下展开
+        else:
+            # 先判断一下这个节点是不是已经展开过了，避免重复展开
+            if node["state"] not in explored:
+                for nextnode in problem.getSuccessors(node["state"]):
+                    # 为了适应可能的数据结构为图，必须判定叶子节点是否已经访问过
+                    if nextnode[0] not in explored:
+                        nextnode = {"state":nextnode[0],
+                                    "path":node["path"]+[nextnode[1]],
+                                    "cost":node["cost"]+nextnode[2]}
+                        # 如果没有访问过，就将叶子节点添加到待搜索的节点集合中
+                        fringe.push(nextnode)
+                # 最后不要忘记把搜索过的节点添加到访问过的节点集合中
+                explored.add(node["state"])
+
+def uniformCostSearch_Old(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     # 初始化相关参数
@@ -187,6 +257,36 @@ def uniformCostSearch(problem):
                 frontier.update(newNode, newCost)
     # 返回计算结果，即一个行动方案
     return result
+
+def uniformCostSearch(problem):
+    """Search the node of least total cost first."""
+    "*** YOUR CODE HERE ***"
+    # 初始化搜索状态
+    fringe = util.PriorityQueue()
+    node = {"state":problem.getStartState(), "path":[], "cost":0}
+    fringe.update(node, node["cost"])
+    explored = set()
+    # 构造循环展开搜索树
+    while (not fringe.isEmpty()):
+        # 获得待判定的叶子节点
+        node = fringe.pop()
+        # 判断节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node["state"]):
+            return node["path"]
+        # 否则，就继续从这个叶子节点往下展开
+        else:
+            # 先判断一下这个节点是不是已经展开过了，避免重复展开
+            if node["state"] not in explored:
+                for nextnode in problem.getSuccessors(node["state"]):
+                    # 为了适应可能的数据结构为图，必须判定叶子节点是否已经访问过
+                    if nextnode[0] not in explored:
+                        nextnode = {"state":nextnode[0],
+                                    "path":node["path"]+[nextnode[1]],
+                                    "cost":node["cost"]+nextnode[2]}
+                        # 如果没有访问过，就将叶子节点的信息更新到添加到待搜索的节点集合中
+                        fringe.update(nextnode, nextnode["cost"])
+                # 最后不要忘记把搜索过的节点添加到访问过的节点集合中
+                explored.add(node["state"])
 
 def nullHeuristic(state, problem=None):
     """
@@ -226,7 +326,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         for child,direction,cost in problem.getSuccessors(node):
             # 根据该子节点是否访问过，更新frontier队列
             if (child not in explored) and (child not in frontierSet):
-                # print("push:",child,"cost:",cost + heuristic(child, problem))
                 # 和之前的一致代价搜索不一样的是，此处需要把启发值算进去
                 frontier.push(child,cost + heuristic(node, problem))
                 # 把当前子节点的动作加到行动方案里面，并记录其行动代价
