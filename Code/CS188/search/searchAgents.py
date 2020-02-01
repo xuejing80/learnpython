@@ -358,7 +358,6 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
-
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -376,17 +375,26 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    xy1 = state
-    result = []
-    left = 0
-    for xy2 in corners:
-        if xy2 not in state:
-            result.append(abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
-            left += 1
-    if len(result)>0:
-        return min(result) + (left*20)
-    else:
-        return 0
+    heuristicAccumulator = 0
+    foodRemain = {}
+    x,y = state[0]
+    # 先把所有没有吃到过的豆豆的位置保存在字典中，并设置值的初始值为0
+    for i in range(len(state[1])):
+        if state[1][i]==0:
+            foodRemain[corners[i]] = 0
+    # 然后从吃豆人初始的位置，挨个求出吃掉最近豆豆的曼哈顿距离，并求和
+    while(len(foodRemain)>0):
+        # 内部这个循环的目的是计算从当前位置(x,y)到每一个豆豆的曼哈顿距离，并保存下来
+        for nextNode in foodRemain.keys():
+            foodRemain[nextNode] = abs(x-nextNode[0])+abs(y-nextNode[1])
+        # 从一系列豆豆中找到曼哈顿距离最短的豆豆，并用其坐标更新(x,y)
+        x,y = min(foodRemain,key=lambda key:foodRemain[key])
+        # 并将该豆豆的曼哈顿距离作为启发值累加起来
+        heuristicAccumulator += foodRemain[(x,y)]
+        # 最后，将该对应位置的豆豆从字典中删掉
+        del foodRemain[(x,y)]
+    # 最后，将累加的启发值返回出去即可
+    return heuristicAccumulator
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -480,7 +488,21 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodRemain = {}
+    x,y = position
+    # 先把所有没有吃到过的豆豆的位置保存在字典中，并设置值的初始值为0
+    for food in foodGrid.asList():
+        foodRemain[food] = 0
+    # 然后从吃豆人当前的位置，求出吃掉实际步数最多豆豆的距离，因为其中会顺带吃掉其他的豆豆
+    if len(foodRemain)>0:
+        # 内部这个循环的目的是计算从当前位置(x,y)到每一个豆豆的曼哈顿距离，并保存下来
+        for nextNode in foodRemain.keys():
+            foodRemain[nextNode] = mazeDistance((x,y), nextNode, problem.startingGameState)
+        # 从一系列豆豆中找到实际步数最多的豆豆，并用其坐标更新(x,y)
+        x,y = max(foodRemain,key=lambda key:foodRemain[key])
+        return foodRemain[(x,y)]
+    else:
+        return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -511,7 +533,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.uniformCostSearch(AnyFoodSearchProblem(gameState))
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -547,7 +569,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (x,y) in self.food.asList()
 
 def mazeDistance(point1, point2, gameState):
     """

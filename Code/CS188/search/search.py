@@ -295,7 +295,7 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch_Old(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     # 初始化相关参数
@@ -342,6 +342,36 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 solution[child].append(direction)
                 pathcost[child] = pathcost[node] + cost
                 frontierSet.add(child)
+
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+    # 初始化搜索状态
+    fringe = util.PriorityQueue()
+    node = {"state":problem.getStartState(), "path":[], "cost":0}
+    fringe.update(node, node["cost"]+heuristic(node["state"], problem))
+    explored = set()
+    # 构造循环展开搜索树
+    while (not fringe.isEmpty()):
+        # 获得待判定的叶子节点
+        node = fringe.pop()
+        # 判断节点是否满足目标要求，如果是一个可行解，就返回行动方案
+        if problem.isGoalState(node["state"]):
+            return node["path"]
+        # 否则，就继续从这个叶子节点往下展开
+        else:
+            # 先判断一下这个节点是不是已经展开过了，避免重复展开
+            if node["state"] not in explored:
+                for nextnode in problem.getSuccessors(node["state"]):
+                    # 为了适应可能的数据结构为图，必须判定叶子节点是否已经访问过
+                    if nextnode[0] not in explored:
+                        nextnode = {"state":nextnode[0],
+                                    "path":node["path"]+[nextnode[1]],
+                                    "cost":node["cost"]+nextnode[2]}
+                        # 如果没有访问过，就将叶子节点的信息更新到添加到待搜索的节点集合中
+                        fringe.update(nextnode, nextnode["cost"]+heuristic(nextnode["state"], problem))
+                # 最后不要忘记把搜索过的节点添加到访问过的节点集合中
+                explored.add(node["state"])
 
 # Abbreviations
 bfs = breadthFirstSearch
