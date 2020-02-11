@@ -78,3 +78,4 @@
 ### 人工智能导论（伯克利大学的CS188课程）项目实战
 * [项目介绍](http://inst.cs.berkeley.edu/~cs188/fa19/projects/)
 1. [Project 1: Search](Code/CS188/search/search.py)
+2. [Project 2: Multi-Agent Search](Code/CS188/multiagent/multiAgents.py)
