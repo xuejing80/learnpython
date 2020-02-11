@@ -156,46 +156,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        return self._getMax(gameState)[1]
-        
-    def _getMax(self, gameState, depth = 0, agentIndex = 0):
-        # 获得下一步可行的操作
-        legalActions = gameState.getLegalActions(agentIndex)
-        # 如果深度超限或者没有可行的下一步，则终止DFS
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState), None
-        # 否则就进行DFS搜索
-        maxVal = None
+        maxVal = -float('inf')
         bestAction = None
-        # 对下一步可行的操作进行遍历
-        for action in legalActions:
-            # 如果当前的Agent是吃豆人，那么就要做加分项，否则就是鬼怪，要做减分项
-            if agentIndex == gameState.getNumAgents() - 1:
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)[0]
-            else:
-                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)[0]
-            if (maxVal == None or value > maxVal)  and value is not None:
+        # 从吃豆人最初的位置，遍历所有可行的下一步
+        for action in gameState.getLegalActions(0):
+            # 求出接下来的所有MIN值，并和maxVal比较，求出MAX值
+            value = self._getMin(gameState.generateSuccessor(0, action))
+            # 如果当前的value比maxVal还要大，更新maxVal值，并记下bestAction
+            if value is not None and value > maxVal:
                 maxVal = value
                 bestAction = action
-        return maxVal, bestAction
-    
-    def _getMin(self, gameState, depth = 0, agentIndex = 0):
-        # 这个函数的功能和上面相似，不再注释了
-        legalActions = gameState.getLegalActions(agentIndex)
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState), None
+        # 最后返回最佳选择
+        return bestAction
         
-        minVal = None
-        bestAction = None
+    def _getMax(self, gameState, depth = 0, agentIndex = 0):
+        # 获得吃豆人下一步所有合法的操作
+        legalActions = gameState.getLegalActions(agentIndex)
+        # 如果展开深度达到限制或者没有可行的下一步，则终止展开，并返回评价值
+        if depth == self.depth or len(legalActions)==0:
+            return self.evaluationFunction(gameState)
+        # 否则就进行继续向下展开
+        maxVal = -float('inf')
+        # 对吃豆人下一步可行的操作进行遍历
         for action in legalActions:
+            # 注意观察agentIndex参数位置的值为1，表示从第一个鬼怪开始MIN遍历
+            value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, 1)
+            if value is not None and value > maxVal:
+                maxVal = value
+        return maxVal
+    
+    def _getMin(self, gameState, depth = 0, agentIndex = 1):
+        # 获得鬼怪们的下一步合法操作，注意：是一群鬼怪，可能不止一只，所以MIN函数会反复调用
+        legalActions = gameState.getLegalActions(agentIndex)
+        # 同样，如果展开深度达到限制或者没有可行的下一步，则终止展开，并返回评价值
+        if depth == self.depth or len(legalActions)==0:
+            return self.evaluationFunction(gameState)
+        # 否则，继续往下展开可行的行动
+        minVal = float('inf')
+        # 对当前鬼怪的可行下一步进行遍历，其中要递归调用以计算其他鬼怪的行动
+        for action in legalActions:
+            # 如果当前已经是最后一只鬼怪，那么下一轮就该是计算吃豆人的行为了，即调用MAX函数
             if agentIndex == gameState.getNumAgents() - 1:
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)[0]
+                # 注意观察agentIndex参数位置的值为0，表示吃豆人
+                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)
             else:
-                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)[0]
-            if (minVal == None or value < minVal)  and value is not None:
+                # 注意观察agentIndex参数位置的值为agentIndex+1，表示下一个鬼怪
+                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)
+            if value is not None and value < minVal:
                 minVal = value
-                bestAction = action
-        return minVal, bestAction  
+        return minVal
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -207,50 +216,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        # 从根节点开始展开，求MAX值，注意：返回值中下标为1的项才是行动内容
         return self._getMax(gameState)[1]
         
     def _getMax(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),
                beta = float('inf')):
+        # 如果深度超限，或者无法继续展开，则返回当前状态的评价值
         legalActions = gameState.getLegalActions(agentIndex)
         if depth == self.depth or len(legalActions)==0:
             return self.evaluationFunction(gameState), None
+        # 否则，就继续往下遍历吃豆人可能的下一步
         maxVal = None
         bestAction = None
-        
         for action in legalActions:
-            if agentIndex >= gameState.getNumAgents() - 1:
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0, alpha, beta)[0]
-            else:
-                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1, alpha, beta)[0]
-            if value > beta and value is not None:
-                return value, action
-            if value > alpha and value is not None:
-                alpha = value
-            if (maxVal == None or value > maxVal)  and value is not None:
+            # 考虑只有一个吃豆人的情况，直接求其MIN分支的评价值，agentIndex从1开始遍历所有鬼怪
+            value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, 1, alpha, beta)[0]
+            if value is not None and (maxVal == None or value > maxVal):
                 maxVal = value
                 bestAction = action
+            # 按照α-β剪枝算法，如果v>β，则直接返回v
+            if value is not None and value > beta:
+                return value, action
+            # 按照α-β剪枝算法，这里还需要更新α的值
+            if value is not None and value > alpha:
+                alpha = value
         return maxVal, bestAction
     
     def _getMin(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),
                beta = float('inf')):
+        # 如果深度超限，或者无法继续展开，则返回当前状态的评价值
         legalActions = gameState.getLegalActions(agentIndex)
         if depth == self.depth or len(legalActions)==0:
             return self.evaluationFunction(gameState), None
-        
+        # 否则，就继续往下遍历当前鬼怪可能的下一步
         minVal = None
         bestAction = None
         for action in legalActions:
+            # 如果当前是最后一个鬼怪，那么下一轮就该是计算吃豆人的行为了，即调用MAX函数
             if agentIndex >= gameState.getNumAgents() - 1:
+                # 注意观察参数，除了agentIndex参数位置的值为0表示吃豆人之外，还多了α和β的值
                 value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0, alpha, beta)[0]
             else:
+                # 如果不是最后一个鬼怪，则继续遍历下一个鬼怪，即agentIndex+1
                 value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1, alpha, beta)[0]
-            if value < alpha and value is not None:
-                return value, action
-            if value < beta and value is not None:
-                beta = value
-            if (minVal == None or value < minVal)  and value is not None:
+            if value is not None and (minVal == None or value < minVal):
                 minVal = value
                 bestAction = action
+            # 按照α-β剪枝算法，如果v<α，则直接返回v
+            if value is not None and value < alpha:
+                return value, action
+            # 按照α-β剪枝算法，这里还需要更新β的值
+            if value is not None and value < beta:
+                beta = value
         return minVal, bestAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -268,9 +285,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         return self._getMax(gameState)
         
-    def _getMax(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),
-               beta = float('inf')):
-        # 获得合法的下一步行动
+    def _getMax(self, gameState, depth = 0, agentIndex = 0):
+        # 获得吃豆人所有合法的下一步行动
         legalActions = gameState.getLegalActions(agentIndex)
         # 如果深度超限或者没有可行的行动，则返回评价函数值
         if depth == self.depth or len(legalActions)==0:
@@ -279,37 +295,33 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         maxVal = None
         bestAction = None
         for action in legalActions:
-            # 如果当前是一个吃豆人，则执行MAX操作，否则是鬼怪，进行Expectimax操作
-            if agentIndex >= gameState.getNumAgents() - 1:
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0, alpha, beta)
-            else: 
-                value = self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1, alpha, beta)
-            if value > alpha and value is not None:
-                alpha = value
-            if (maxVal == None or value > maxVal)  and value is not None:
+            # 从第一个鬼怪开始，进行Expectimax操作
+            value = self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, 1)
+            if value is not None and (maxVal == None or value > maxVal):
                 maxVal = value
                 bestAction = action
-                
+        # 下面的程序，是对根节点展开的另外一种表达方式
         if depth is 0 and agentIndex is 0:
             return bestAction
         else:
             return maxVal
     
-    def _getExpectation(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),    
-               beta = float('inf')):
+    def _getExpectation(self, gameState, depth = 0, agentIndex = 0):
         legalActions = gameState.getLegalActions(agentIndex)
         # 如果搜索深度超限，或者没有下一步了，则返回评价函数值
         if depth == self.depth or len(legalActions)==0:
             return self.evaluationFunction(gameState) 
-        # 初始化效用值
+        # 初始化效用值总计
         totalUtil = 0
         numActions = len(legalActions)
-        # 轮询所有的可行下一步
+        # 轮询当前鬼怪所有可行的下一步
         for action in legalActions:
+            # 同样，如果是最后一个鬼怪，那么接下来要去算吃豆人的MAX值，并计入效用总计
             if agentIndex >= gameState.getNumAgents() - 1:
-                totalUtil += self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0, alpha, beta)
+                totalUtil += self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)
+            # 否则，挨个遍历各个鬼怪，计算Expectation值，并计入效用总计
             else:
-                totalUtil += self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1, alpha, beta)
+                totalUtil += self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)
         # 最后需要把所有可能的下一步的效用值求平均，并返回
         return totalUtil / float(numActions)
 
