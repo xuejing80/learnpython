@@ -79,3 +79,4 @@
 * [项目介绍](http://inst.cs.berkeley.edu/~cs188/fa19/projects/)
 1. [Project 1: Search](Code/CS188/search/search.py)
 2. [Project 2: Multi-Agent Search](Code/CS188/multiagent/multiAgents.py)
+3. [Project 3: Reinforcement Learning](Code/CS188/reinforcement/qlearningAgents.py)
