@@ -43,6 +43,8 @@ class QLearningAgent(ReinforcementAgent):
         ReinforcementAgent.__init__(self, **args)
 
         "*** YOUR CODE HERE ***"
+        # 设置初始Q值
+        self.q_values = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -51,8 +53,8 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        # 将参数指定的Q值返回出去
+        return self.q_values[(state, action)]
 
     def computeValueFromQValues(self, state):
         """
@@ -62,7 +64,15 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 获取所有可行的action
+        legalActions = self.getLegalActions(state)
+        if len(legalActions)==0:
+            return 0.0
+        tmp = util.Counter()
+        for action in legalActions:
+            tmp[action] = self.getQValue(state, action)
+        # util.Counter()这个增强版的字典，可以直接返回其中的最大值，嘿嘿
+        return tmp[tmp.argMax()]
 
     def computeActionFromQValues(self, state):
         """
@@ -71,7 +81,17 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 获取所有可行的action
+        actions = self.getLegalActions(state)
+        best_action = None
+        # 求所有action中Q值最大的那一个，并返回对应的action
+        max_val = float('-inf')
+        for action in actions:
+          q_value = self.q_values[(state, action)]
+          if max_val < q_value:
+            max_val = q_value
+            best_action = action
+        return best_action
 
     def getAction(self, state):
         """
@@ -88,9 +108,12 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
-        return action
+        # 以一定的概率访问最优的action，这个是Q7的要求，可以一并做了
+        explore = util.flipCoin(self.epsilon)
+        if explore:
+            return random.choice(legalActions)
+        else:
+            return self.getPolicy(state)
 
     def update(self, state, action, nextState, reward):
         """
@@ -102,7 +125,15 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 第1步，获取旧的Q值，为了程序的简洁，重命名变量
+        old_Q = self.getQValue(state, action)
+        a = self.alpha
+        r = reward
+        g = self.discount
+        if nextState:
+            self.q_values[(state, action)] = (1 - a) * old_Q + a * (r + g * self.getValue(nextState))
+        else:
+            self.q_values[(state, action)] = (1 - a) * old_Q + a * r
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -165,14 +196,24 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 把所有的特征值给取出来
+        features = self.featExtractor.getFeatures(state, action)
+        # 接下来做矩阵乘法，得到最后的Q值
+        total = 0
+        for i in features:
+            total += features[i] * self.weights[i]
+        return total
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 根据公式计算diff值，并更新系数矩阵w
+        diff = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
+        features = self.featExtractor.getFeatures(state, action)
+        for i in features:
+            self.weights[i] = self.weights[i] + self.alpha * diff * features[i]
 
     def final(self, state):
         "Called at the end of each game."
@@ -183,4 +224,12 @@ class ApproximateQAgent(PacmanQAgent):
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
-            pass
+            # 这里用于输出调试信息，随便各位啦~~
+            print("Approximate Q-Learning Summary")
+            print("Learning rate(alpha) : {0}".format(self.alpha))
+            print("Discount rate(gamma) : {0}".format(self.gamma))
+            print("Exploration rate(epsilon) : {0}".format(self.epsilon))
+            print("Training episodes : {0}".format(self.numTraining))
+            print("=======Feature Weights=======")
+            for i in features:
+                print("{0} : {1}".format(i, self.weights[i]))
