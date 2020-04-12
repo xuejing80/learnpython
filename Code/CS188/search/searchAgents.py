@@ -377,6 +377,7 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     heuristicAccumulator = 0
     foodRemain = {}
+    print(state)
     x,y = state[0]
     # 先把所有没有吃到过的豆豆的位置保存在字典中，并设置值的初始值为0
     for i in range(len(state[1])):

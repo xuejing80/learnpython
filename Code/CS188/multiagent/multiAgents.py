@@ -46,7 +46,7 @@ class ReflexAgent(Agent):
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        # print("Selected action:",legalMoves[chosenIndex],"\n")
+
         "Add more of your code here if you want to"
 
         return legalMoves[chosenIndex]
@@ -74,28 +74,27 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        # 求出最近的鬼怪，计算危险值
-        nearestGhost = min([manhattanDistance(newPos,ghostState.configuration.pos) for ghostState in newGhostStates])
-        # 为了让吃豆人不要总是躲着鬼怪，我们只考虑距离2步以内的鬼怪造成的影响
-        # 为什么取-20？因为接下来我会把豆豆的启发值设置在10以内，两者相加一定为负数，这样就可以抵消豆豆对吃豆人的诱惑，^_^
-        # 为什么不是-10？因为如果下一步直接吃到豆豆，那个successorGameState.getScore()会算上吃到豆豆的10分
-        dangerScore = -20 if nearestGhost <2 else 0
+        # 通过鬼怪和当前pacman的位置计算危险值
+        # 将所有鬼怪离当前的位置全部计算出来
+        Ghosts = [manhattanDistance(ghost.configuration.pos, newPos) for ghost in newGhostStates]
+        # 求最近的鬼怪的曼哈顿距离，其他的鬼怪可以不计
+        nearestGhost = min(Ghosts)
+        # 以为吃到豆豆可以+10，设置为-20可以抵消吃掉豆豆的得分和下方的豆豆启发值
+        # 为什么小于2，因为大于等于2的鬼怪，不要考虑呀，否则，豆豆就老是躲着鬼怪
+        dangousScore = -1000 if nearestGhost<2 else 0
 
-        # 如果豆豆还没有吃光，用最近的豆豆的坐标计算出一个启发值，优先考虑吃掉最近的豆豆
-        # 这个程序从字面上看，是用曼哈顿距离计算启发值，所以如果吃豆人和豆豆之间有墙的话……吃豆人就卡在墙后面了
-        # 但是，又因为有鬼怪的存在，它会驱动吃豆人离开卡死在墙后面的状态，勉强算是通过测试了
+        # 计算最近的豆豆，对自己的影响
         if len(newFood.asList())>0:
-            nearestFood = (min([manhattanDistance(newPos, food) for food in newFood.asList()]))
-            # 为什么启发值是“9/距离”呢？因为按照我的设计，这个值不能为负数，负数用来表示下一步可能遇到鬼怪
-            # 同时，因为吃到隔壁的豆豆得9分(移动需要扣1分)，且距离越远启发值越小，按照这些规则，我就设计了这样一个启发函数
-            # 如果下一个豆豆就在隔壁，距离为1，那么启发值为9，且距离放在分母，其值越大，启发值就越小，OK！
+            Foods = [manhattanDistance(food, newPos) for food in newFood.asList()]
+            # 求最近的豆豆的距离
+            nearestFood = min(Foods)
+            # 豆豆离我越近，其启发值就必须越大！吃一个豆豆+10，但是还要消耗1点精力移动，所以吃掉隔壁的豆豆的9分
             foodHeuristic = 9/nearestFood
         else:
             foodHeuristic = 0
-        
-        # 把计算好的各种值加起来，并返回
-        # print("Action:",action,"Score:",successorGameState.getScore(),"Danger:",dangerScore,"Food:",foodHeuristic,"Total:",successorGameState.getScore()+foodHeuristic+dangerScore)
-        return successorGameState.getScore()+foodHeuristic+dangerScore
+
+        # 最后把下一个状态的得分也计入评价值结果
+        return successorGameState.getScore() + dangousScore + foodHeuristic
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -156,56 +155,59 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        # 一开始肯定是先从吃豆人的行动开始遍历，这样的返回结果表示吃豆人的行动方案
         maxVal = -float('inf')
         bestAction = None
-        # 从吃豆人最初的位置，遍历所有可行的下一步
         for action in gameState.getLegalActions(0):
-            # 求出接下来的所有MIN值，并和maxVal比较，求出MAX值
-            value = self._getMin(gameState.generateSuccessor(0, action))
-            # 如果当前的value比maxVal还要大，更新maxVal值，并记下bestAction
-            if value is not None and value > maxVal:
+            # 求出所有可行的action中，哪一个是最优的
+            # 参数中的0表示搜索深度从0开始，1表示下一个agent的Index是1，即第一个鬼怪
+            value = self.getMin(gameState.generateSuccessor(0, action),0,1)
+            # 通过比较最优值,将对应的action记录下来
+            if value>maxVal:
                 maxVal = value
                 bestAction = action
-        # 最后返回最佳选择
-        return bestAction
-        
-    def _getMax(self, gameState, depth = 0, agentIndex = 0):
-        # 获得吃豆人下一步所有合法的操作
-        legalActions = gameState.getLegalActions(agentIndex)
-        # 如果展开深度达到限制或者没有可行的下一步，则终止展开，并返回评价值
-        if depth == self.depth or len(legalActions)==0:
+        # 最后，只需将最优行动返回给吃豆人即可
+        return bestAction   
+
+    # getMax主要是计算吃豆人选择最佳的动作
+    def getMax(self,gameState,depth=0,agentIndex=0):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
             return self.evaluationFunction(gameState)
-        # 否则就进行继续向下展开
+        # 如果接下来没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState)
+        # 获得吃豆人的所有可行操作，并进行遍历
         maxVal = -float('inf')
-        # 对吃豆人下一步可行的操作进行遍历
-        for action in legalActions:
-            # 注意观察agentIndex参数位置的值为1，表示从第一个鬼怪开始MIN遍历
-            value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, 1)
-            if value is not None and value > maxVal:
+        for action in gameState.getLegalActions(agentIndex):
+            # 参数中最后的“1”，表示接下来的动作是计算鬼怪的行动影响
+            value = self.getMin(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1)
+            if value>maxVal:
                 maxVal = value
-        return maxVal
-    
-    def _getMin(self, gameState, depth = 0, agentIndex = 1):
-        # 获得鬼怪们的下一步合法操作，注意：是一群鬼怪，可能不止一只，所以MIN函数会反复调用
-        legalActions = gameState.getLegalActions(agentIndex)
-        # 同样，如果展开深度达到限制或者没有可行的下一步，则终止展开，并返回评价值
-        if depth == self.depth or len(legalActions)==0:
+        return maxVal            
+
+    # getMin主要是计算鬼怪选择造成最坏影响的动作
+    def getMin(self,gameState,depth=0,agentIndex=1):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
             return self.evaluationFunction(gameState)
-        # 否则，继续往下展开可行的行动
+        # 如果接下来没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState)
+        # 获得当前鬼怪的所有可行操作，并进行遍历
         minVal = float('inf')
-        # 对当前鬼怪的可行下一步进行遍历，其中要递归调用以计算其他鬼怪的行动
-        for action in legalActions:
-            # 如果当前已经是最后一只鬼怪，那么下一轮就该是计算吃豆人的行为了，即调用MAX函数
-            if agentIndex == gameState.getNumAgents() - 1:
-                # 注意观察agentIndex参数位置的值为0，表示吃豆人
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)
+        for action in gameState.getLegalActions(agentIndex):
+            # 如果你是最后一个鬼怪的agent，那么接下来就要去计算吃豆人的行动，否则就去计算下一个鬼怪的行动
+            if agentIndex == gameState.getNumAgents()-1:
+                # 参数中最后的“0”，表示接下来的动作是计算吃豆人的行动影响
+                value = self.getMax(gameState.generateSuccessor(agentIndex, action),depth+1,0)
             else:
-                # 注意观察agentIndex参数位置的值为agentIndex+1，表示下一个鬼怪
-                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)
-            if value is not None and value < minVal:
+                # 参数中最后的agentIndex(大于1)，表示接下来的动作是计算鬼怪的行动影响
+                value = self.getMin(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1)
+            if value<minVal:
                 minVal = value
         return minVal
-
+        
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -216,59 +218,62 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        # 从根节点开始展开，求MAX值，注意：返回值中下标为1的项才是行动内容
-        return self._getMax(gameState)[1]
-        
-    def _getMax(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),
-               beta = float('inf')):
-        # 如果深度超限，或者无法继续展开，则返回当前状态的评价值
-        legalActions = gameState.getLegalActions(agentIndex)
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState), None
-        # 否则，就继续往下遍历吃豆人可能的下一步
-        maxVal = None
+        # 一开始肯定是先从吃豆人的行动开始，所以直接调用getMax函数
+        maxVal, bestAction = self.getMax(gameState)
+        return bestAction
+        # 上述语句的另外一种写法
+        return self.getMax(gameState)[1]
+
+    # getMax主要是计算吃豆人选择最佳的动作
+    def getMax(self,gameState,depth=0,agentIndex=0,alpha=-float('inf'),beta=float('inf')):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
+            return self.evaluationFunction(gameState),None
+        # 如果接下来没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState),None
+        # 获得吃豆人的所有可行操作，并进行遍历
+        maxVal = -float('inf')
         bestAction = None
-        for action in legalActions:
-            # 考虑只有一个吃豆人的情况，直接求其MIN分支的评价值，agentIndex从1开始遍历所有鬼怪
-            value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, 1, alpha, beta)[0]
-            if value is not None and (maxVal == None or value > maxVal):
+        for action in gameState.getLegalActions(agentIndex):
+            # 参数中最后的“1”，表示接下来的动作是计算鬼怪的行动影响
+            value = self.getMin(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1,alpha,beta)[0]
+            if value>maxVal:
                 maxVal = value
                 bestAction = action
-            # 按照α-β剪枝算法，如果v>β，则直接返回v
-            if value is not None and value > beta:
-                return value, action
-            # 按照α-β剪枝算法，这里还需要更新α的值
-            if value is not None and value > alpha:
-                alpha = value
-        return maxVal, bestAction
-    
-    def _getMin(self, gameState, depth = 0, agentIndex = 0, alpha = -float('inf'),
-               beta = float('inf')):
-        # 如果深度超限，或者无法继续展开，则返回当前状态的评价值
-        legalActions = gameState.getLegalActions(agentIndex)
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState), None
-        # 否则，就继续往下遍历当前鬼怪可能的下一步
-        minVal = None
+            # 如果v>beta,
+            if value>beta:
+                return value,action
+            alpha = value if value>alpha else alpha
+        return maxVal,bestAction
+
+    # getMin主要是计算鬼怪选择造成最坏影响的动作
+    def getMin(self,gameState,depth=0,agentIndex=1,alpha=-float('inf'),beta=float('inf')):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
+            return self.evaluationFunction(gameState),None
+        # 如果接下来没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState),None
+        # 获得当前鬼怪的所有可行操作，并进行遍历
+        minVal = float('inf')
         bestAction = None
-        for action in legalActions:
-            # 如果当前是最后一个鬼怪，那么下一轮就该是计算吃豆人的行为了，即调用MAX函数
-            if agentIndex >= gameState.getNumAgents() - 1:
-                # 注意观察参数，除了agentIndex参数位置的值为0表示吃豆人之外，还多了α和β的值
-                value = self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0, alpha, beta)[0]
+        for action in gameState.getLegalActions(agentIndex):
+            # 如果你是最后一个鬼怪的agent，那么接下来就要去计算吃豆人的行动，否则就去计算下一个鬼怪的行动
+            if agentIndex == gameState.getNumAgents()-1:
+                # 参数中最后的“0”，表示接下来的动作是计算吃豆人的行动影响
+                value = self.getMax(gameState.generateSuccessor(agentIndex, action),depth+1,0,alpha,beta)[0]
             else:
-                # 如果不是最后一个鬼怪，则继续遍历下一个鬼怪，即agentIndex+1
-                value = self._getMin(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1, alpha, beta)[0]
-            if value is not None and (minVal == None or value < minVal):
+                # 参数中最后的agentIndex(大于1)，表示接下来的动作是计算鬼怪的行动影响
+                value = self.getMin(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1,alpha,beta)[0]
+            if value<minVal:
                 minVal = value
                 bestAction = action
-            # 按照α-β剪枝算法，如果v<α，则直接返回v
-            if value is not None and value < alpha:
-                return value, action
-            # 按照α-β剪枝算法，这里还需要更新β的值
-            if value is not None and value < beta:
-                beta = value
-        return minVal, bestAction
+            if value<alpha:
+                return value,action
+            beta = value if value<beta else beta # 这个条件选择语句和C语言中"exp1?exp2:exp3"一样
+        return minVal,bestAction
+        
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -283,47 +288,50 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        return self._getMax(gameState)
+        return self.getMax(gameState)[1]
         
-    def _getMax(self, gameState, depth = 0, agentIndex = 0):
-        # 获得吃豆人所有合法的下一步行动
-        legalActions = gameState.getLegalActions(agentIndex)
-        # 如果深度超限或者没有可行的行动，则返回评价函数值
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState)
-        # 否则初始化，并对合法的下一步进行轮询
-        maxVal = None
+    # 与Minimax算法一样，getMax主要是计算吃豆人的最佳行动
+    def getMax(self,gameState,depth=0,agentIndex=0):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
+            return self.evaluationFunction(gameState),None
+        # 如果接下来吃豆人已经没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState),None
+        # 获得吃豆人的所有可行操作，并进行遍历
+        maxVal = -float('inf')
         bestAction = None
-        for action in legalActions:
-            # 从第一个鬼怪开始，进行Expectimax操作
-            value = self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, 1)
-            if value is not None and (maxVal == None or value > maxVal):
+        for action in gameState.getLegalActions(agentIndex):
+            # 参数中最后的“1”，表示接下来的动作是计算鬼怪的行动影响
+            value = self.getExpect(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1)
+            if value>maxVal:
                 maxVal = value
                 bestAction = action
-        # 下面的程序，是对根节点展开的另外一种表达方式
-        if depth is 0 and agentIndex is 0:
-            return bestAction
-        else:
-            return maxVal
-    
-    def _getExpectation(self, gameState, depth = 0, agentIndex = 0):
-        legalActions = gameState.getLegalActions(agentIndex)
-        # 如果搜索深度超限，或者没有下一步了，则返回评价函数值
-        if depth == self.depth or len(legalActions)==0:
-            return self.evaluationFunction(gameState) 
-        # 初始化效用值总计
+        return maxVal,bestAction
+
+    # getExpect主要是计算鬼怪选择造成影响的状态的效用值，即各种可能的状态的效用值平均
+    def getExpect(self,gameState,depth,agentIndex=1):
+        # 如果达到搜索深度，则将当前状态的评价值返回
+        if depth == self.depth:
+            return self.evaluationFunction(gameState)
+        # 如果接下来没有可行的行动，也要终止迭代
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState)
+        # 获得当前鬼怪的所有可行操作，并进行遍历,求ExpectValue
         totalUtil = 0
-        numActions = len(legalActions)
-        # 轮询当前鬼怪所有可行的下一步
-        for action in legalActions:
-            # 同样，如果是最后一个鬼怪，那么接下来要去算吃豆人的MAX值，并计入效用总计
-            if agentIndex >= gameState.getNumAgents() - 1:
-                totalUtil += self._getMax(gameState.generateSuccessor(agentIndex, action), depth+1, 0)
-            # 否则，挨个遍历各个鬼怪，计算Expectation值，并计入效用总计
+        for action in gameState.getLegalActions(agentIndex):
+            # 如果当前是最后一个鬼怪的agent，那么下一次轮到吃豆人
+            if agentIndex == gameState.getNumAgents()-1:
+                # 参数中最后的“0”，表示接下来的动作是计算吃豆人的行动影响
+                value = self.getMax(gameState.generateSuccessor(agentIndex, action),depth+1,0)[0]
+                # 因为当前的步骤依然是鬼怪的行动，所以即便下一步是吃豆人的行动，本次计算中依然要求ExpectValue
+                totalUtil += value
             else:
-                totalUtil += self._getExpectation(gameState.generateSuccessor(agentIndex, action), depth, agentIndex+1)
-        # 最后需要把所有可能的下一步的效用值求平均，并返回
-        return totalUtil / float(numActions)
+                # 参数中最后的agentIndex(大于1)，表示接下来的动作是计算鬼怪的行动影响
+                value = self.getExpect(gameState.generateSuccessor(agentIndex, action),depth,agentIndex+1)
+                totalUtil += value
+        # 将totalUtil除以所有可行的动作数，求得平均值，并返回
+        return totalUtil/len(gameState.getLegalActions(agentIndex))
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -333,33 +341,35 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    # 初始化可能需要的信息
-    Pos = currentGameState.getPacmanPosition()
-    Food = currentGameState.getFood()
-    GhostStates = currentGameState.getGhostStates()
-    ScaredTimes = [ghostState.scaredTimer for ghostState in GhostStates]
-    # 根据鬼怪的状态计算危险值
-    if len(GhostStates)>0:
-        nearestGhost = min([manhattanDistance(Pos,ghostState.configuration.pos) for ghostState in GhostStates])
-        if len(Food.asList()) > 0:
-            if nearestGhost <2:
-                dangerScore = -10/float(nearestGhost+1)
-            else:
-                dangerScore=0
-        else:
-            dangerScore = 100000 / float(nearestGhost**2)
+    # 获得计算需要的初始信息，包括吃豆人位置、食物、鬼怪以及鬼怪为惊吓状态的剩余时间
+    pacmanPos = currentGameState.getPacmanPosition()
+    foods = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTime = [ghost.scaredTimer for ghost in ghostStates]
+    
+    # 先计算最近的食物对吃豆人的影响
+    if len(foods)>0:
+        Foods = [manhattanDistance(food, pacmanPos) for food in foods]
+        # 求最近的豆豆的距离
+        nearestFood = min(Foods)
+        # 豆豆离我越近，其启发值就必须越大！吃一个豆豆+10，但是还要消耗1点精力移动，所以吃掉隔壁的豆豆得9分
+        foodHeuristic = 0
     else:
-        dangerScore = 0
-    # 根据最近的食物计算启发值
-    if len(Food.asList()) > 0:
-        nearestFood = (min([manhattanDistance(Pos, food) for food in Food.asList()]))
-        nearFoodHeuristic = 1/float(nearestFood**2)
-    else:
-        nearFoodHeuristic = 0
-    # 这个值是告诉吃豆人尽量让鬼怪保持可以被吃掉的状态
-    totalScaredTimes = sum(ScaredTimes)
-    # 最后将上述三个值加到下一个状态的得分，构成总计值，进行返回
-    return currentGameState.getScore()*10+nearFoodHeuristic*2+dangerScore+totalScaredTimes/10
+        foodHeuristic = 0
+        
+    # 通过鬼怪和当前pacman的位置计算危险值
+    if len(ghostStates)>0:
+        # 将所有鬼怪离当前的位置全部计算出来
+        Ghosts = [manhattanDistance(ghost.configuration.pos, pacmanPos) for ghost in ghostStates]
+        # 求最近的鬼怪的曼哈顿距离，其他的鬼怪可以不计
+        nearestGhost = min(Ghosts)
+        dangousScore = -1000 if nearestGhost<2 else 0
+
+    # 尽量让鬼怪保持惊吓状态，因为这种状态下的鬼怪可以被吃豆人吃掉
+    totalScaredTimes = sum(scaredTime)
+    
+    # 最后把下一个状态的得分也计入评价值结果
+    return  currentGameState.getScore() + foodHeuristic + dangousScore + totalScaredTimes
 
 # Abbreviation
 better = betterEvaluationFunction
