@@ -87,7 +87,8 @@ class QLearningAgent(ReinforcementAgent):
         # 求所有action中Q值最大的那一个，并返回对应的action
         max_val = float('-inf')
         for action in actions:
-          q_value = self.q_values[(state, action)]
+          # q_value = self.q_values[(state, action)]
+          q_value = self.getQValue(state, action)
           if max_val < q_value:
             max_val = q_value
             best_action = action
@@ -186,9 +187,15 @@ class ApproximateQAgent(PacmanQAgent):
         self.featExtractor = util.lookup(extractor, globals())()
         PacmanQAgent.__init__(self, **args)
         self.weights = util.Counter()
+        # 设置初始Q值
+        # self.q_values = util.Counter()
 
     def getWeights(self):
-        return self.weights
+        result = []
+        for item in self.weights:
+            result.append(self.weights[item])
+        return result
+        # return self.weights
 
     def getQValue(self, state, action):
         """
@@ -202,6 +209,7 @@ class ApproximateQAgent(PacmanQAgent):
         total = 0
         for i in features:
             total += features[i] * self.weights[i]
+            # print("test:",i)
         return total
 
     def update(self, state, action, nextState, reward):
@@ -213,7 +221,11 @@ class ApproximateQAgent(PacmanQAgent):
         diff = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
         features = self.featExtractor.getFeatures(state, action)
         for i in features:
+            # print("features",i,":",features[i])
+            # print("before weights",i,":",self.weights[i])
             self.weights[i] = self.weights[i] + self.alpha * diff * features[i]
+            # self.q_values[(state, action)] = self.getQValue(state, action)
+            # print("after weights",i,":",self.weights[i])
 
     def final(self, state):
         "Called at the end of each game."
@@ -221,15 +233,18 @@ class ApproximateQAgent(PacmanQAgent):
         PacmanQAgent.final(self, state)
 
         # did we finish training?
-        if self.episodesSoFar == self.numTraining:
+        # if self.episodesSoFar == self.numTraining:
+        if self.episodesSoFar % 100 == 0:
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
             # 这里用于输出调试信息，随便各位啦~~
+            '''
             print("Approximate Q-Learning Summary")
             print("Learning rate(alpha) : {0}".format(self.alpha))
-            print("Discount rate(gamma) : {0}".format(self.gamma))
+            print("Discount rate(gamma) : {0}".format(self.discount))
             print("Exploration rate(epsilon) : {0}".format(self.epsilon))
             print("Training episodes : {0}".format(self.numTraining))
             print("=======Feature Weights=======")
-            for i in features:
-                print("{0} : {1}".format(i, self.weights[i]))
+            for item in self.weights:
+                print("{0} : {1}".format(item,self.weights[item]))
+            '''
